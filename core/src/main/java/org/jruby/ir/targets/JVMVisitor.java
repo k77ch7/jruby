@@ -432,11 +432,11 @@ public class JVMVisitor extends IRVisitor {
     // In other places, methods reference JVM -> MethodData -> IRBytecodeAdapter -> SkinnyMethodAdapter (via jvm.method().adapter) and ask it to walk the last link
     // Can this be cleaned up to either (a) get rid of IRBytecodeAdapter OR (b) implement passthru' methods for SkinnyMethodAdapter methods (like the others it implements)?
 
+    // SSS FIXME: Needs an update to reflect instr. change
     @Override
     public void AliasInstr(AliasInstr aliasInstr) {
         IRBytecodeAdapter m = jvm.method();
         m.loadLocal(0);
-        m.loadLocal(getJVMLocalVarIndex(aliasInstr.getReceiver()));
         m.adapter.ldc(((StringLiteral) aliasInstr.getNewName()).string);
         m.adapter.ldc(((StringLiteral) aliasInstr.getOldName()).string);
         m.invokeHelper("defineAlias", IRubyObject.class, ThreadContext.class, IRubyObject.class, Object.class, Object.class);
@@ -936,6 +936,7 @@ public class JVMVisitor extends IRVisitor {
         a.pop();
     }
 
+    // SSS FIXME: Needs an update to reflect instr. change
     @Override
     public void DefineInstanceMethodInstr(DefineInstanceMethodInstr defineinstancemethodinstr) {
         IRMethod method = defineinstancemethodinstr.getMethod();
@@ -1622,6 +1623,7 @@ public class JVMVisitor extends IRVisitor {
         jvmStoreLocal(toaryinstr.getResult());
     }
 
+    // SSS FIXME: Needs an update to reflect instr. change
     @Override
     public void UndefMethodInstr(UndefMethodInstr undefmethodinstr) {
         jvm.method().loadContext();
