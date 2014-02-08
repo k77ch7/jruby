@@ -3,8 +3,8 @@ package org.jruby.ir;
 import java.util.ArrayList;
 import java.util.List;
 import org.jruby.ir.operands.LocalVariable;
-import org.jruby.parser.IRStaticScope;
 import org.jruby.parser.StaticScope;
+import org.jruby.parser.IRStaticScope;
 
 // FIXME: I made this IRModule because any methods placed in top-level script goes
 // into something which an IRScript is basically a module that is special in that
@@ -13,12 +13,11 @@ public class IRScriptBody extends IRScope {
     private List<IRClosure> beginBlocks;
     private List<IRClosure> endBlocks;
 
-    public IRScriptBody(IRManager manager, String className, String sourceName,
-            StaticScope staticScope) {
+    public IRScriptBody(IRManager manager, String className, String sourceName, StaticScope staticScope) {
         super(manager, null, sourceName, sourceName, 0, staticScope);
-
-        if (!getManager().isDryRun()) {
-            if (staticScope != null) ((IRStaticScope)staticScope).setIRScope(this);
+        if (!getManager().isDryRun() && staticScope != null) {
+            ((IRStaticScope)staticScope).setIRScope(this);
+            staticScope.setScopeType(this.getScopeType());
         }
     }
 

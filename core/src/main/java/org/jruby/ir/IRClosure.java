@@ -86,7 +86,10 @@ public class IRClosure extends IRScope {
             this.body = null;
         } else {
             this.body = new InterpretedIRBlockBody(this, arity, argumentType);
-            if ((staticScope != null) && !isForLoopBody) ((IRStaticScope)staticScope).setIRScope(this);
+            if (staticScope != null && !isForLoopBody()) {
+                ((IRStaticScope)staticScope).setIRScope(this);
+                staticScope.setScopeType(this.getScopeType());
+            }
         }
 
         // increase nesting depth if needed after isForLoopBody value is set

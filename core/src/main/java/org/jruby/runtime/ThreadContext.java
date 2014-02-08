@@ -54,6 +54,7 @@ import org.jruby.RubyThread;
 import org.jruby.ast.executable.RuntimeCache;
 import org.jruby.exceptions.JumpException.ReturnJump;
 import org.jruby.internal.runtime.methods.DynamicMethod;
+import org.jruby.ir.IRScopeType;
 import org.jruby.lexer.yacc.ISourcePosition;
 import org.jruby.ext.fiber.ThreadFiber;
 import org.jruby.parser.StaticScope;
@@ -579,11 +580,44 @@ public final class ThreadContext {
     public boolean scopeExistsOnCallStack(StaticScope s) {
         DynamicScope[] stack = scopeStack;
         for (int i = scopeIndex; i >= 0; i--) {
-           if (stack[i].getStaticScope() == s) return true;
+            if (stack[i].getStaticScope() == s) return true;
         }
         return false;
     }
-    
+
+    public RubyModule findNearestMethodContainer(DynamicScope currDynScope, IRubyObject self) {
+        DynamicScope[] stack = scopeStack;
+        for (int i = scopeIndex; i >= 0; i--) {
+            DynamicScope ds   = stack[i];
+            StaticScope  s    = ds.getStaticScope();
+            IRScopeType  type = s.getScopeType();
+            if (ds.inModuleEval()) {
+                return (RubyModule)self;
+            } else if (ds.inInstanceEval()) {
+                return self.getSingletonClass();
+            } else if (type == null) {
+                continue;
+            } else {
+                IRScopeType hostType = currDynScope.getStaticScope().getScopeType();
+                if (hostType.isMethod()) {
+                    return self.getSingletonClass();
+                } else {
+                    switch (type) {
+                        case SCRIPT_BODY:
+                            return self.getType();
+
+                        case MODULE_BODY:
+                        case CLASS_BODY:
+                        case METACLASS_BODY:
+                            return (RubyModule)self;
+                    }
+                }
+            }
+        }
+
+        throw new RuntimeException("Should never get here!");
+    }
+
     public String getFrameName() {
         return getCurrentFrame().getName();
     }

@@ -22,6 +22,7 @@ import org.jruby.ir.IREvalScript;
 import org.jruby.ir.IRClosure;
 import org.jruby.ir.IRMethod;
 import org.jruby.ir.IRScope;
+import org.jruby.ir.IRScopeType;
 import org.jruby.ir.operands.IRException;
 import org.jruby.ir.operands.UndefinedValue;
 import org.jruby.javasupport.JavaClass;
@@ -30,6 +31,7 @@ import org.jruby.parser.StaticScope;
 import org.jruby.runtime.Arity;
 import org.jruby.runtime.Block;
 import org.jruby.runtime.CallType;
+import org.jruby.runtime.DynamicScope;
 import org.jruby.runtime.Helpers;
 import org.jruby.runtime.ThreadContext;
 import org.jruby.runtime.Visibility;
@@ -453,6 +455,31 @@ public class IRRuntimeHelpers {
             } else {
                 throw context.runtime.newNoMethodError("super called outside of method", null, context.runtime.getNil());
             }
+        }
+    }
+
+    private static RubyModule getTargetClass(IRScopeType hostScopeType, IRScopeType targetScopeType, IRubyObject self) {
+        switch (targetScopeType) {
+            case SCRIPT_BODY:
+                return self.getType();
+
+            case MODULE_BODY:
+            case CLASS_BODY:
+                return hostScopeType == IRScopeType.INSTANCE_METHOD ? self.getType() : (RubyModule)self;
+
+            case METACLASS_BODY:
+                return hostScopeType == IRScopeType.INSTANCE_METHOD ? self.getSingletonClass() : (RubyModule)self;
+
+            default:
+                throw new RuntimeException("Should not get here!");
+        }
+    }
+
+    public static RubyModule findInstanceMethodContainer(ThreadContext context, DynamicScope currDynScope, IRubyObject self, IRScopeType staticTargetScopeType) {
+        if (staticTargetScopeType == IRScopeType.CLOSURE || staticTargetScopeType == IRScopeType.EVAL_SCRIPT) {
+            return context.findNearestMethodContainer(currDynScope, self);
+        } else {
+            return getTargetClass(currDynScope.getStaticScope().getScopeType(), staticTargetScopeType, self);
         }
     }
 }

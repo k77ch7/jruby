@@ -752,7 +752,7 @@ public class IRBuilder {
     public Operand buildAlias(final AliasNode alias, IRScope s) {
         Operand newName = build(alias.getNewName(), s);
         Operand oldName = build(alias.getOldName(), s);
-        addInstr(s, new AliasInstr(s.getSelf(), newName, oldName));
+        addInstr(s, new AliasInstr(newName, oldName, getStaticMethodContainerType(s)));
 
         return manager.getNil();
     }
@@ -1803,9 +1803,24 @@ public class IRBuilder {
         return method;
     }
 
+    private IRScopeType getStaticMethodContainerType(IRScope s) {
+        // Walk lexical scope stack till you hit a IRClosure (blocks static resolution)
+        // or you hit a scope that can be scope targets (IRScriptBody, IRModuleBody).
+        while (!(s instanceof IRScriptBody) && !(s instanceof IRModuleBody)) {
+            if (s.getScopeType() == IRScopeType.CLOSURE ||
+                (s instanceof IREvalScript && (((IREvalScript)s).isModuleEval())))
+            {
+                break;
+            }
+            s = s.getLexicalParent();
+        }
+
+        return s.getScopeType();
+    }
+
     public Operand buildDefn(MethodDefNode node, IRScope s) { // Instance method
         IRMethod method = defineNewMethod(node, s, true);
-        addInstr(s, new DefineInstanceMethodInstr(new StringLiteral("--unused--"), method));
+        addInstr(s, new DefineInstanceMethodInstr(method, getStaticMethodContainerType(s)));
         return new Symbol(method.getName());
     }
 
@@ -3341,9 +3356,9 @@ public class IRBuilder {
         return U_NIL;
     }
 
-    public IREvalScript buildEvalRoot(StaticScope staticScope, IRScope containingScope, String file, int lineNumber, RootNode rootNode) {
+    public IREvalScript buildEvalRoot(StaticScope staticScope, IRScope containingScope, String file, int lineNumber, RootNode rootNode, boolean isModuleEval) {
         // Top-level script!
-        IREvalScript script = new IREvalScript(manager, containingScope, file, lineNumber, staticScope);
+        IREvalScript script = new IREvalScript(manager, containingScope, file, lineNumber, staticScope, isModuleEval);
 
         // Debug info: record line number
         addInstr(script, new LineNumberInstr(script, lineNumber));
@@ -3454,7 +3469,7 @@ public class IRBuilder {
     public Operand buildUndef(Node node, IRScope s) {
         Operand methName = build(((UndefNode) node).getName(), s);
         Variable result = s.getNewTemporaryVariable();
-        addInstr(s, new UndefMethodInstr(result, methName));
+        addInstr(s, new UndefMethodInstr(result, methName, getStaticMethodContainerType(s)));
         return result;
     }
 

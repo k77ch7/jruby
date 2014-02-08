@@ -108,10 +108,10 @@ public class Interpreter extends IRTranslator<IRubyObject, IRubyObject> {
         return containingIRScope;
     }
 
-    public static IRubyObject interpretCommonEval(Ruby runtime, String file, int lineNumber, String backtraceName, RootNode rootNode, IRubyObject self, Block block) {
+    public static IRubyObject interpretCommonEval(Ruby runtime, String file, int lineNumber, String backtraceName, RootNode rootNode, IRubyObject self, Block block, boolean isModuleEval) {
         StaticScope ss = rootNode.getStaticScope();
         IRScope containingIRScope = getEvalContainerScope(ss);
-        IREvalScript evalScript = IRBuilder.createIRBuilder(runtime, runtime.getIRManager()).buildEvalRoot(ss, containingIRScope, file, lineNumber, rootNode);
+        IREvalScript evalScript = IRBuilder.createIRBuilder(runtime, runtime.getIRManager()).buildEvalRoot(ss, containingIRScope, file, lineNumber, rootNode, isModuleEval);
         evalScript.prepareForInterpretation(false);
         ThreadContext context = runtime.getCurrentContext();
 
@@ -139,11 +139,11 @@ public class Interpreter extends IRTranslator<IRubyObject, IRubyObject> {
     }
 
     public static IRubyObject interpretSimpleEval(Ruby runtime, String file, int lineNumber, String backtraceName, Node node, IRubyObject self) {
-        return interpretCommonEval(runtime, file, lineNumber, backtraceName, (RootNode)node, self, Block.NULL_BLOCK);
+        return interpretCommonEval(runtime, file, lineNumber, backtraceName, (RootNode)node, self, Block.NULL_BLOCK, true);
     }
 
     public static IRubyObject interpretBindingEval(Ruby runtime, String file, int lineNumber, String backtraceName, Node node, IRubyObject self, Block block) {
-        return interpretCommonEval(runtime, file, lineNumber, backtraceName, (RootNode)node, self, block);
+        return interpretCommonEval(runtime, file, lineNumber, backtraceName, (RootNode)node, self, block, false);
     }
 
     public static void runBeginEndBlocks(List<IRClosure> beBlocks, ThreadContext context, IRubyObject self, Object[] temp) {

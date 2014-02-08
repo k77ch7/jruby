@@ -138,7 +138,7 @@ public class IRReader {
         case CLOSURE:
             return new IRClosure(manager, lexicalParent, isForLoopBody, line, staticScope, Arity.createArity(arity), argumentType);
         case EVAL_SCRIPT:
-            return new IREvalScript(manager, lexicalParent, lexicalParent.getFileName(), line, staticScope);
+            return new IREvalScript(manager, lexicalParent, lexicalParent.getFileName(), line, staticScope, false);
         }
 
         return null;

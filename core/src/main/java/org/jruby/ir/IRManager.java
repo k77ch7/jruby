@@ -24,7 +24,6 @@ public class IRManager {
     public static String DEFAULT_INLINING_COMPILER_PASSES = "LocalOptimizationPass";
 
     private int dummyMetaClassCount = 0;
-    private final IRModuleBody classMetaClass = new IRMetaClassBody(this, null, getMetaClassName(), "", 0, null);
     private final IRModuleBody object = new IRClassBody(this, null, "Object", "", 0, null);
     private final Nil nil = new Nil();
     private final UnboxedBoolean trueObject = new UnboxedBoolean(true);
@@ -166,10 +165,6 @@ public class IRManager {
 
     public void removeListener(IRScopeListener listener) {
         if (irScopeListener.equals(listener)) irScopeListener = null;
-    }
-
-    public IRModuleBody getClassMetaClass() {
-        return classMetaClass;
     }
 
     public String getMetaClassName() {
