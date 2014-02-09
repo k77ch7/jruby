@@ -704,27 +704,28 @@ public final class ThreadContext {
         // FIXME: this seems like a good assertion, but it breaks compiled code and the code seems
         // to run without it...
         //assert currentModule != null : "Can't push null RubyClass";
-        int index = ++parentIndex;
-        RubyModule[] stack = parentStack;
-        stack[index] = currentModule;
-        if (index + 1 == stack.length) {
-            expandParentsIfNecessary();
-        }
+        // int index = ++parentIndex;
+        // RubyModule[] stack = parentStack;
+        // stack[index] = currentModule;
+        // if (index + 1 == stack.length) {
+        //     expandParentsIfNecessary();
+        // }
     }
     
     public RubyModule popRubyClass() {
-        int index = parentIndex;
-        RubyModule[] stack = parentStack;
-        RubyModule ret = stack[index];
-        stack[index] = null;
-        parentIndex = index - 1;
-        return ret;
+        // int index = parentIndex;
+        // RubyModule[] stack = parentStack;
+        // RubyModule ret = stack[index];
+        // stack[index] = null;
+        // parentIndex = index - 1;
+        return null;
     }
     
     public RubyModule getRubyClass() {
-        assert parentIndex != -1 : "Trying to get RubyClass from empty stack";
-        RubyModule parentModule = parentStack[parentIndex];
-        return parentModule.getNonIncludedClass();
+        //assert parentIndex != -1 : "Trying to get RubyClass from empty stack";
+        //RubyModule parentModule = parentStack[parentIndex];
+        //return parentModule.getNonIncludedClass();
+        return null;
     }
 
     public RubyModule getPreviousRubyClass() {
