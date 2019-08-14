@@ -538,7 +538,7 @@ public class RubyDir extends RubyObject implements Closeable {
     private static IRubyObject eachChildCommon(ThreadContext context, IRubyObject recv, RubyString path, RubyEncoding encoding, Block block) {
         final Ruby runtime = context.runtime;
         if (block.isGiven()) {
-            RubyDir dir = (RubyDir) runtime.getDir().newInstance(context, path, Block.NULL_BLOCK);
+            RubyDir dir = (RubyDir) runtime.getDir().newInstance(context, path, encoding != null ? encoding.to_s(context) : null, Block.NULL_BLOCK);
 
             dir.each_child(context, encoding == null ? runtime.getDefaultEncoding() : encoding.getEncoding(), block);
             return context.nil;
@@ -553,7 +553,7 @@ public class RubyDir extends RubyObject implements Closeable {
     private static IRubyObject foreachCommon(ThreadContext context, IRubyObject recv, RubyString path, RubyEncoding encoding, Block block) {
         final Ruby runtime = context.runtime;
         if (block.isGiven()) {
-            RubyDir dir = (RubyDir) runtime.getDir().newInstance(context, path, Block.NULL_BLOCK);
+            RubyDir dir = (RubyDir) runtime.getDir().newInstance(context, path, encoding != null ? encoding.to_s(context) : null, Block.NULL_BLOCK);
 
             dir.each(context, encoding == null ? runtime.getDefaultEncoding() : encoding.getEncoding(), block);
             return context.nil;
